@@ -1,8 +1,14 @@
-<html>
+
+
+{% extends 'master.html' %}
+{% block body %}
+<h2> 
+    <a href="{{url_for('new_user')}}"> Create User <h2>
 {% for user in users %}
-<h2>
+<h3>
     <a href="{{ url_for('view_user', id=user.id) }}">User {{ user.id }}</a>, 
 
-    age {{ user.age }} has {{ user.ratings|length }} ratings</h2>
+    age {{ user.age }}, has {{ user.ratings|length }} ratings</h3>
 {% endfor %}
-</html>
+
+{% endblock %}
