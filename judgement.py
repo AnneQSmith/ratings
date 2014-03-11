@@ -15,6 +15,14 @@ def index():
 def user_login_form():
     return render_template("login_user.html")
 
+
+@app.route("/logout", methods=['GET'])
+def logout():
+    session['user_id'] = None
+    session['username'] = None
+    flash("Re-enter credentials to rate more movies")
+    return render_template("login_user.html")
+
 @app.route("/user/login", methods=['POST'])
 def user_login():
      # Get login data for user from login-user form
@@ -24,6 +32,9 @@ def user_login():
     user_list = model.session.query(model.User).filter_by(email=username, password=password).all()
     if len(user_list) == 0:
         flash("User does not exist.")
+        return render_template("login_user.html")
+    elif (user_list[0].email == None) | (user_list[0].email == ""):
+        flash("Enter an id")
         return render_template("login_user.html")
     else:
         #Note we are ignoring the case in which there are multiple users with the credentials
@@ -53,7 +64,6 @@ def search():
 
     return render_template("results.html", movies=movies)
 
-
 @app.route("/rate/<int:id>", methods=["POST"])
 def rate_movie(id):
     rating_number = int(request.form['rating'])
@@ -71,7 +81,9 @@ def rate_movie(id):
     rating.rating = rating_number
     model.session.commit()
 
-    return redirect(url_for("view_movie", id=id))
+    user = model.session.query(model.User).get(user_id)
+    ratings = model.session.query(model.Rating).filter_by(user_id=user_id)    
+    return render_template("view_user.html", user=user, ratings=ratings)    
 
 
 @app.route("/movie/<int:id>", methods=["GET"])
