@@ -3,10 +3,28 @@
 {% block body %}
 
    <h2> 
-        <a href="{{url_for('edit_user', id=user.id) }}"> Edit User Id {{ user.id }} </a> 
+        <a href="{{url_for('edit_user', id=user.id) }}"> Edit Account Information for ID = {{ user.id }} </a> 
+    </h2> <br>
+
+   <h2> 
+        <a href="{{url_for('list_movies') }}"> List All Movies </a> 
+    </h2> <br>
+
     <h2>
+          <a href="{{url_for('display_search') }}"> Search for Movies </a> 
+    </h2><br>
 
-   <h3> Name =  {{user.email}}, age {{ user.age }}, has {{ user.ratings|length }} ratings</h3>
+   <h3> User ID: {{user.email}} <br>
+    Age: {{ user.age }} <br> 
+    Zipcode: {{user.zipcode}} <br>
+    {{ user.ratings|length }}  ratings<br><br>
+   </h3>
 
+   <h3> Existing Ratings: </h3>
+
+    {% for r in ratings %}
+    <h5> <b>{{r.movie.name}}</b> |  {{r.rating}} Stars</h5>
+    {% endfor %}
+    
 {% endblock %}
 

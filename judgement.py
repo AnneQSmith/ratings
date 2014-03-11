@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, request, flash, session
+from flask import Flask, render_template, redirect, request, flash, session,url_for
 import model
 
 app = Flask(__name__)
@@ -6,8 +6,10 @@ app.secret_key = 'some_secret'
 
 @app.route("/")
 def index():
-    user_list = model.session.query(model.User).limit(15).all()
-    return render_template("user_list.html", users=user_list)
+    return render_template("login_user.html")
+
+    # user_list = model.session.query(model.User).limit(15).all()
+    # return render_template("user_list.html", users=user_list)
 
 @app.route("/user/login", methods=['GET'])
 def user_login_form():
@@ -27,11 +29,74 @@ def user_login():
         #Note we are ignoring the case in which there are multiple users with the credentials
         flash("User authenticated.")
         session['username'] = username
-        print session, session['username']
         id = user_list[0].id
+        session['user_id'] = id
+        print session, session['username'], session['user_id']
         ratings = model.session.query(model.Rating).filter_by(user_id=id)    
     return render_template("view_user.html", user=user_list[0], ratings=ratings)    
     
+
+
+
+@app.route("/search", methods=["GET"])
+def display_search():
+    return render_template("search.html")
+
+@app.route("/search", methods=["POST"])
+def search():
+    query = request.form['query']
+    movies = model.session.query(model.Movie).\
+            filter(model.Movie.name.ilike("%" + query + "%")).\
+            limit(20).all()
+    for movie in movies:
+        print movie.name
+
+    return render_template("results.html", movies=movies)
+
+
+@app.route("/rate/<int:id>", methods=["POST"])
+def rate_movie(id):
+    rating_number = int(request.form['rating'])
+    user_id = session['user_id']
+
+    rating = model.session.query(model.Rating).filter_by(user_id=user_id, movie_id=id).first()
+
+    if not rating:
+        flash("Rating added", "success")
+        rating = model.Rating(user_id=user_id, movie_id=id)
+        model.session.add(rating)
+    else:
+        flash("Rating updated", "success")
+
+    rating.rating = rating_number
+    model.session.commit()
+
+    return redirect(url_for("view_movie", id=id))
+
+
+@app.route("/movie/<int:id>", methods=["GET"])
+def view_movie(id):
+    movie = model.session.query(model.Movie).get(id)
+    ratings = movie.ratings
+    rating_nums = []
+    user_rating = None
+    for r in ratings:
+ #       if r.user_id == session['user_id']:
+        user_rating = r
+        rating_nums.append(r.rating)
+    avg_rating = float(sum(rating_nums))/len(rating_nums)
+
+    prediction = None
+    # if not user_rating:
+    #     user = db_session.query(User).get(g.user_id) 
+    #     prediction = user.predict_rating(movie)
+    #     print prediction
+    
+    return render_template("movie.html", movie=movie, 
+            average=avg_rating, user_rating=user_rating,
+            prediction = prediction)
+
+
 @app.route("/search/movie", methods=['POST'])
 def movie_search():
     name = request.form.get("name")
@@ -41,9 +106,11 @@ def movie_search():
     #      print movies[m].name
     # return "blah blah blah"
 
-@app.route("/search/movie", methods=['GET'])
-def movie_search_form():
-    return render_template("movie_search.html")
+@app.route("/list/movies", methods=['GET'])
+def list_movies():
+    movie_list = model.session.query(model.Movie).limit(2000).all()
+
+    return render_template("movie_list.html", movies=movie_list)
 
 # Display a single user record
 @app.route("/user/<id>", methods=['GET'])
@@ -87,48 +154,45 @@ def edit_user_form(id):
 
 @app.route("/user/edit/<id>", methods=['POST'])
 def edit_user(id):
-
+#still no type checking on input parameters
     user = model.session.query(model.User).get(id)
     username = user.email
     print " username = ",username
-    if session['username'] != username:
-        flash("you must login before you can edit")
-        return render_template("login_user.html")
-    else:
-        return "blah"
 
-# def edit_user(id):
-#     # Display an HTML form to edit an new user
-#     print "hello we made it to edit_user post"
-#    #  username = request.form.get("username")
-#    #  password = request.form.get("password")
-#    #  age = int(request.form.get("age"))
-#    #  zipcode = request.form.get("zipcode")
+#TODO check session information    
+# if session['username'] != username:
+#     flash("you must login before you can edit")
+#     return render_template("login_user.html")
+# else:
+    newusername = request.form.get("username")
+    if newusername:
+        user.email = newusername
+        print newusername
+    
+    newpassword = request.form.get("password")
+    if newpassword:
+        user.password = newpassword
+        print newpassword
 
-#    #  user = model.User(email=username, password=password,age=age, zipcode=zipcode)
-#    #  #model.session.add(user)
-#    # # model.session.commit()
+    newage = request.form.get("age")
+    if newage:
+        user.age = newage
+        print newage
 
-#    #  print username, password,age,zipcode
-#     return render_template("edit_user.html")
-#    # return render_template("edit_user.html", user)
-    #return redirect(url_for("new_user"))
+    newzip = request.form.get("zipcode")
+    if newzip:
+        user.zipcode = newzip
+        print newzip
 
-# Update an existing user
-# @app.route("/user/<id>", methods=['POST'])
-# def update_user(id):
-    # Query for the user from the database
+    print "hopefully these made it to the db", user.email, user.password, user.age, user.zipcode, user.id
 
-    # Check that you actually got data from the database!?
+    model.session.commit() 
+    
+    ratings = model.session.query(model.Rating).filter_by(user_id=id)
 
-    # Get data from request.form
-
-    # Update the user object
-
-    # Save (hint: commit) the user to the database 
-
-    # redirect user to movie trailers on youtube for cute cat videos
-    # (flash message to the user that their update worked)
+    return render_template("view_user.html", user=user, ratings=ratings)  
+    #return "blah"   
+  
 
 
 

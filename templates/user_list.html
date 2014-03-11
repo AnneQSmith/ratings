@@ -3,12 +3,18 @@
 {% extends 'master.html' %}
 {% block body %}
 <h2> 
-    <a href="{{url_for('new_user')}}"> Create User <h2>
+    <a href="{{url_for('user_login')}}"> Existing User Login</a> <h2>
+
+    <h2> 
+    <a href="{{url_for('new_user_form')}}"> Create User <a><h2>
+
+<h3> Legacy User Information </h3>
+
 {% for user in users %}
-<h3>
+<h4>
     <a href="{{ url_for('view_user', id=user.id) }}">User {{ user.id }}</a>, 
 
-    age {{ user.age }}, has {{ user.ratings|length }} ratings</h3>
+    age {{ user.age }}, has {{ user.ratings|length }} ratings</h4>
 {% endfor %}
 
 {% endblock %}

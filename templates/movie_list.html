@@ -1,0 +1,15 @@
+
+
+{% extends 'master.html' %}
+{% block body %}
+
+
+<h3> Movies </h3>
+<br>
+{% for movie in movies %}
+<h5>
+    {{ movie.name}}
+</h5>
+{% endfor %}
+
+{% endblock %}
