@@ -18,8 +18,9 @@ def user_login_form():
 
 @app.route("/logout", methods=['GET'])
 def logout():
-    session['user_id'] = None
-    session['username'] = None
+    # session['user_id'] = None
+    # session['username'] = None
+    session.clear()
     flash("Re-enter credentials to rate more movies")
     return render_template("login_user.html")
 
@@ -58,7 +59,7 @@ def search():
     query = request.form['query']
     movies = model.session.query(model.Movie).\
             filter(model.Movie.name.ilike("%" + query + "%")).\
-            limit(20).all()
+            limit(50).all()
     for movie in movies:
         print movie.name
 
@@ -92,17 +93,22 @@ def view_movie(id):
     ratings = movie.ratings
     rating_nums = []
     user_rating = None
+    current_user_id = session['user_id']
     for r in ratings:
- #       if r.user_id == session['user_id']:
-        user_rating = r
+        if r.user_id == current_user_id:
+            user_rating = r
         rating_nums.append(r.rating)
-    avg_rating = float(sum(rating_nums))/len(rating_nums)
+    n_ratings = len(rating_nums)
+    if n_ratings > 0:
+        avg_rating = float(sum(rating_nums))/n_ratings
+    else:
+        avg_rating = None
 
     prediction = None
-    # if not user_rating:
-    #     user = db_session.query(User).get(g.user_id) 
-    #     prediction = user.predict_rating(movie)
-    #     print prediction
+    if not user_rating:
+        user = model.session.query(model.User).get(current_user_id) 
+        prediction = user.predict_rating(movie)
+        print current_user_id, prediction, movie.name
     
     return render_template("movie.html", movie=movie, 
             average=avg_rating, user_rating=user_rating,
@@ -148,12 +154,24 @@ def new_user():
     age = request.form.get("age")
     zipcode = request.form.get("zipcode")
 
-    user = model.User(email=username, password=password,age=age, zipcode=zipcode)
-    model.session.add(user)
-    model.session.commit()
+# check whether name exists:
+    existinguserlist = model.session.query(model.User).filter_by(email=username).all()
+    if len(existinguserlist) > 0:
+        flash("That user name is taken, try again")
+        return render_template("new_user_form.html")
 
-    print username, password,age,zipcode
-    return render_template("new_user_form.html")
+# Go ahead and assume it's valid input no matter what the crazy user did    
+    else:            
+        user = model.User(email=username, password=password,age=age, zipcode=zipcode)
+        model.session.add(user)
+        model.session.commit()
+        #Automatically create a session for this user
+        session["user_id"] = user.id
+        session["username"] = user.email
+
+        print username, password,age,zipcode,user.id
+        return redirect(url_for("view_user", id=user.id))
+   # return render_template("view_user.html",user=user, user.id)
 
 
 @app.route("/user/edit/<id>", methods=['GET'])

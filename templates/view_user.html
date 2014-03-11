@@ -6,26 +6,21 @@
           <li><b> {{ message }}</b></li>
      {% endfor %}
     </ul>
-
+<h2> The ratings page of {{user.email}} </h2><br>
    <h3> 
-        <a href="{{url_for('edit_user', id=user.id) }}"> Edit Account Information for {{ user.email }} </a> 
-    </h3> <br>
+        <a href="{{url_for('edit_user', id=user.id) }}"> Edit Account Information </a> 
+    </h3> 
 
     <h3>
           <a href="{{url_for('display_search') }}"> Search for Movies </a> 
-    </h3><br>
-
- 
-
-   <h3> User ID: {{user.email}} <br>
-    {{ user.ratings|length }}  ratings
-   </h3>
+    </h3>
 
    <h3>
         <a href = "{{url_for('logout') }}" > Log out {{user.email}} </a>
-        </h3>
+    </h3>
 
-   <h3> Existing Ratings: </h3>
+<br>
+   <h3> {{ user.ratings|length}} Existing Ratings: </h3>
 
     {% for r in ratings %}
     <h5> <a href = "{{url_for('view_movie', id=r.movie.id) }}"  > {{r.movie.name}}|  {{r.rating}} Stars</h5></a>

@@ -3,6 +3,15 @@
 <h2>{{movie.name}} &mdash; Released in {{movie.released_at.year}}</h2>
 <h3> Average rating: {{ "%.2f"%average }}</h3>
 
+
+{% if user_rating %}
+
+<h3>Your rating: {{ user_rating.rating }}</h3>
+{% elif prediction %}
+
+<h3>Our prediction for you: {{ "%.2f"%prediction }}</h3>
+{% endif %}
+
 <h2>Rate this movie</h2>
 <form action="{{url_for('rate_movie', id=movie.id)}}" method="post">
     <select name="rating">
@@ -16,6 +25,5 @@
     <input type="submit">
 </form>
 
-
-
 {% endblock %}
+
