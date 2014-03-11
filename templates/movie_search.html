@@ -1,0 +1,8 @@
+{% extends 'master.html' %}
+{% block body %}
+    <form class="title_search" method="POST" action="/search/movie">
+        <input type="text" class="form-control" placeholder="Movie Title" name="name">
+         <input type="submit" class="btn btn-lg btn-primary btn-block" value="Submit">    
+    </form>
+{% endblock %}    
+     

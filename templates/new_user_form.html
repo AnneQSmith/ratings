@@ -1,0 +1,17 @@
+{% extends 'master.html' %}
+{% block body %}
+    <form class="newuser" method="POST" action="/user/new">
+        <h2 class="newuser-heading">Register A New Account</h2>
+        <ul>
+            {% for message in get_flashed_messages() %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+        <input type="text" class="form-control" placeholder="Username" name="username">
+        <input type="text" class="form-control" placeholder="Password" name = "password">
+        <input type="text" class="form-control" placeholder="Age" name="age">
+        <input type="text" class="form-control" placeholder="Zipcode" name="zipcode">
+        <input type="submit" class="btn btn-lg btn-primary btn-block" value="Submit">
+    </form>
+{% endblock %}    
+     

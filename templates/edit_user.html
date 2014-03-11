@@ -1,12 +1,18 @@
 
 {% extends 'master.html' %}
 {% block body %}
-    <form class="edituser" method="POST" action="/user/edit">
+    <form class="edituser" method="POST" action="/user/edit/{{user.id}}">
+
         <h2 class="edituser-heading">Edit an existing account</h2>
-        <input type="text" class="form-control" placeholder="email" name="username">
-        <input type="password" class="form-control" placeholder="password"name="password">
-        <input type="text" class="form-control" placeholder=user.age name="age">
-        <input type="text" class="form-control" placeholder="zipcode" name = "zipcode">
+        <ul>
+            {% for message in get_flashed_messages() %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+        <input type="text" class="form-control" placeholder=email:{{user.email}} name="username">
+        <input type="text" class="form-control" placeholder=pwd:{{user.password}} name="password">
+        <input type="text" class="form-control" placeholder=age:{{user.age}} name="age">
+        <input type="text" class="form-control" placeholder=zip:{{user.zipcode}} name = "zipcode">
         <input type="submit" class="btn btn-lg btn-primary btn-block" value="Submit">
     </form>
 {% endblock %}
