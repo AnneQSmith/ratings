@@ -3,6 +3,19 @@ import csv
 import datetime
 import re
 
+#
+#  before this will work, execute the following:
+# python -i model.py
+# In your interactive python shell that results, type in
+# engine = create_engine("sqlite:///ratings.db", echo=True)
+# Now, open a second terminal window and go to your project folder, do an 
+#       ls to verify that ratings.db does not exist.
+# In your first window, type the following, and something that appears to 
+#           be a sql table schema will scroll by.
+# Base.metadata.create_all(engine)
+# Back in your second window, do another ls You should see a ratings.db file. Invoke sqlite on this 
+
+
 def load_users(session):
     # use u.user
     with open('./seed_data/u.user', 'rb') as f:
